@@ -163,6 +163,33 @@ public class HarvestLog {
 		return totalWeight;
 	}
 	
+	public Date highestYieldDay() {
+		record yieldByDate (BigDecimal mass, Date harvestDate){}
+		List<yieldByDate> yieldList = new ArrayList<>();	
+		Date result = null;
+		try {
+			PreparedStatement ps = dBAddress.prepareStatement(PULL_RECORD);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				BigDecimal mass = rs.getBigDecimal("MASS");
+				Date harvestDate = rs.getDate("HARVEST_DATE");
+				yieldList.add(new yieldByDate(mass, harvestDate));			
+			}		
+			
+			result = yieldList.stream()
+				.collect(
+					Collectors.groupingBy(yieldByDate::harvestDate, HashMap::new,
+						Collectors.reducing(BigDecimal.ZERO, yieldByDate::mass, (a,b) -> a.add(b))))
+				.entrySet().stream()
+				.max((a, b) -> a.getValue().compareTo(b.getValue()))
+				.get().getKey();			
+			
+		} catch (SQLException e) {		
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	private static LocalDate dateFormatter(String string) {
 		String[] dateString = string.split("/");
 		int year = Integer.parseInt(dateString[2]);
