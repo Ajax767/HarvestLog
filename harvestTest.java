@@ -116,5 +116,12 @@ public class cropProdTest {
 		assert(totalWeight.compareTo(m1.add(m2))==0);
 	}
 	
-	 
+	@Test
+	
+	public void findHighestYieldDay() {
+		LocalDate knownHighestYieldDate = LocalDate.of(2021, 07, 21);
+		LocalDate highestYieldDate = harvest.highestYieldDay();
+		assert(highestYieldDate.isEqual(knownHighestYieldDate));
+	}
+	  
 }
